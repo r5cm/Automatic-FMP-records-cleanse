@@ -10,12 +10,10 @@ session <- rforcecom.login(username, password)
 
 # Delete M&E diagnostic repeated records --------------------------------------------
 
+# ATTENTION: DISABLE PROCESS BEFORE DELETING RECORDS!!
 
 # Retrieve M&E Diagnostic records to delete
-diagme.records <- rforcecom.retrieve(session, 
-                                     "FMP_Diagnostics_Targets_Definition_MYE__c", 
-                                     "Id")
-diag.query <- "SELECT Id FROM FMP_Diagnostics_Targets_Definition_MYE__c WHERE Last_parent_record_update__c = 0 LIMIT -5"
+diag.query <- "SELECT Id FROM FMP_Diagnostics_Targets_Definition_MYE__c WHERE Last_parent_record_update__c = 0 ORDER BY FMP_Diagnostic_And_Target_Definition__c"
 diag.rep <- rforcecom.query(session, diag.query)
 
 # Delete records
@@ -23,10 +21,32 @@ diag.rep <- rforcecom.query(session, diag.query)
 job_info <- rforcecom.createBulkJob(session, 
                                     operation='delete', 
                                     object='FMP_Diagnostics_Targets_Definition_MYE__c')
-# split into batch sizes of 500
+# split into batch sizes of 100
 batches_info <- rforcecom.createBulkBatch(session, 
                                           jobId=job_info$id, 
                                           diag.rep, 
+                                          multiBatch = TRUE, 
+                                          batchSize = 100)
+# close job
+Close_job_info <- rforcecom.closeBulkJob(session, jobId = job_info$id)
+
+# s
+
+# Delete M&E Follow up repeated records ---------------------------------------------
+
+# Retrieve Follow up records to delete
+fu.query <- "SELECT Id FROM FMP_Follow_Up_M_E__c WHERE Last_parent_record_update__c = 0 ORDER BY FMP_Follow_Up__c"
+fu.rep <- rforcecom.query(session, fu.query)
+
+# Delete records
+# run an insert job
+job_info <- rforcecom.createBulkJob(session, 
+                                    operation='delete', 
+                                    object='FMP_Follow_Up_M_E__c')
+# split into batch sizes of 500
+batches_info <- rforcecom.createBulkBatch(session, 
+                                          jobId=job_info$id, 
+                                          fu.rep, 
                                           multiBatch = TRUE, 
                                           batchSize = 500)
 # close job
