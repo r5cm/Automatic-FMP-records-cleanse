@@ -1,7 +1,7 @@
 # Login
 library(RForcecom)
-username <- "admin@andes.org"
-password <- "gfadm913XQWRiDpPU6NzJC9Cmm185FF2"
+username <- readline(prompt = "Enter username: ")
+password <- readline(prompt = "Enter password: ")
 session <- rforcecom.login(username, password)
 
 # Salesforce reports with repeated records
